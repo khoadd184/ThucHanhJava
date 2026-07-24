@@ -16,6 +16,10 @@ public class TVSeries extends Movie {
         super(id, name, des, price, type, producer, catagories, release);
         this.episodes = episodes;
         this.avgEpisodeLength = avgEpisodeLength;
+           String loi = layLoiValidationRieng();
+        if (loi != null) {
+            throw new Movievalidationexception(loi);
+        }
     }
 
     public int getEpisodes() {
@@ -30,7 +34,16 @@ public class TVSeries extends Movie {
     public void setAvgEpisodeLength(double avgEpisodeLength) {
         this.avgEpisodeLength = avgEpisodeLength;
     }
-
+    private String layLoiValidationRieng() {
+        if (episodes <= 0) {
+            return "So tap phai lon hon 0.";
+        }
+        if (avgEpisodeLength <= 0) {
+            return "Thoi luong moi tap phai lon hon 0.";
+        }
+        return null;
+    }
+    
     @Override
     public double calculatePrice() {
         return getPrice() * 0.7;

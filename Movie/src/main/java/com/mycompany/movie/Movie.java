@@ -11,7 +11,8 @@ public abstract class Movie implements Imovieaction {
     private String producerid;
     private String catagories;
     private Date release;
-
+    
+    
     public Movie() {
         this.name = "A";
     }
@@ -26,9 +27,11 @@ public abstract class Movie implements Imovieaction {
         this.producerid = producer;
         this.catagories = catagories;
         this.release = release;
-        if (!validation()) {
-            throw new IllegalArgumentException("Dữ liệu Movie không hợp lệ!");
+        String loi = layLoiValidation();
+        if (loi != null) {
+            throw new Movievalidationexception(loi);
         }
+   
     }
 
     public String getId() {
@@ -80,16 +83,15 @@ public abstract class Movie implements Imovieaction {
         this.release = release;
     }
 
-    private boolean validation() {
+    protected String layLoiValidation() {
         if (name == null || name.trim().isEmpty()) {
-            return false;
+            return "Ten phim khong duoc de trong.";
         }
         if (price < 0) {
-            return false;
+            return "Gia phim khong duoc am.";
         }
-        return true;
+        return null; 
     }
-
     @Override
     public String toString() {
         return "Movie{" +

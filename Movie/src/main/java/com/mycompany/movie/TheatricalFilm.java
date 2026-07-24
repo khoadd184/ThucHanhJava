@@ -16,6 +16,10 @@ public class TheatricalFilm extends Movie {
         super(id, name, des, price, type, producer, catagories, release);
         this.filmLength = filmLength;
         this.boxOfficeRevenue = boxOfficeRevenue;
+        String loi = layLoiValidationRieng();
+        if (loi != null) {
+            throw new Movievalidationexception(loi);
+        }
     }
 
     public double getFilmLength() {
@@ -29,6 +33,15 @@ public class TheatricalFilm extends Movie {
     }
     public void setBoxOfficeRevenue(double boxOfficeRevenue) {
         this.boxOfficeRevenue = boxOfficeRevenue;
+    }
+    private String layLoiValidationRieng() {
+        if (filmLength <= 0) {
+            return "thoi luong phim > 0.";
+        }
+        if (boxOfficeRevenue < 0) {
+            return "Doanh thu khong am.";
+        }
+        return null;
     }
 
 
