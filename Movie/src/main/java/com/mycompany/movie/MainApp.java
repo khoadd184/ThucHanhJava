@@ -1,56 +1,40 @@
 package com.mycompany.movie;
 
+import javax.swing.SwingUtilities;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MainApp {
     public static void main(String[] args) {
 
-        // ---- Trường hợp 1: dữ liệu hợp lệ ----
+        List<Movie> danhSachPhim = new ArrayList<>();
         try {
             Movie tvSeries = new TVSeries("1", "Vinh Da Kieu", "Phim co trang Trung Quoc", 50000,
                     "TVSeries", "Dai truyen hinh Ho Nam", "Tam ly", new Date(),
                     40, 45);
-
-            System.out.println(tvSeries.toString());
-            System.out.println("Gia sau tinh toan: " + tvSeries.calculatePrice());
-            System.out.println("Mau tieu de: " + tvSeries.toTitleColor());
-
+            danhSachPhim.add(tvSeries);
         } catch (Movievalidationexception e) {
             System.out.println("Loi du lieu phim: " + e.getMessage());
         }
 
-        System.out.println();
         try {
-            Movie phimLoi = new TheatricalFilm("2", "Avengers", "Phim sieu anh hung", -80000,
+            Movie theatricalFilm = new TheatricalFilm("2", "Avengers", "Phim sieu anh hung", 80000,
                     "TheatricalFilm", "Marvel Studios", "Hanh dong", new Date(),
                     150, 2000000);
-
-            System.out.println(phimLoi.toString());
-
+            danhSachPhim.add(theatricalFilm);
         } catch (Movievalidationexception e) {
             System.out.println("Loi du lieu phim: " + e.getMessage());
         }
-
-        System.out.println();
-
         try {
-            Movie phimLoi2 = new TheatricalFilm("3", "Avatar 3", "Phim khoa hoc vien tuong", 80000,
-                    "TheatricalFilm", "Hanh dong", "20th Century Studios", new Date(),
-                    0, 2000000); 
-
-            System.out.println(phimLoi2.toString());
-
+            Movie phimLoi = new TheatricalFilm("3", "Avatar 3", "Phim khoa hoc vien tuong", -80000,
+                    "TheatricalFilm", "20th Century Studios", "Hanh dong", new Date(),
+                    150, 2000000);
+            danhSachPhim.add(phimLoi);
         } catch (Movievalidationexception e) {
-            System.out.println("Loi du lieu phim: " + e.getMessage());
+            System.out.println("Loi du lieu phim (bo qua, khong hien thi): " + e.getMessage());
         }
 
-        try {
-            Movie tvLoi = new TVSeries("4", "", "Phim test", 10000,
-                    "TVSeries", "Test Studio", "Test", new Date(), 10, 30);
-        } catch (Movievalidationexception e) {
-            System.out.println("Loi du lieu phim: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Loi khong xac dinh: " + e.getMessage());
-        }
+        SwingUtilities.invokeLater(() -> new MovieFrame(danhSachPhim).setVisible(true));
     }
 }
