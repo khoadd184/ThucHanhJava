@@ -1,6 +1,7 @@
 com\mycompany\movie\Movievalidationexception.class
 com\mycompany\movie\Imovieaction.class
 com\mycompany\movie\Movie.class
+com\mycompany\movie\Moviefilemanager.class
 com\mycompany\movie\MovieFrame$1.class
 com\mycompany\movie\MainApp.class
 com\mycompany\movie\TVSeries.class

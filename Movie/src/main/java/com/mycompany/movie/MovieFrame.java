@@ -4,22 +4,24 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-// Cửa sổ hiển thị danh sách phim, có thêm chức năng Thêm / Xóa phim
+
 public class MovieFrame extends JFrame {
 
     private static final String[] COT = {
         "ID", "Tên phim", "Loại", "Giá gốc", "Giá sau tính toán"
     };
 
-    // Field lưu danh sách phim -> dùng chung cho renderer, bảng, thêm, xóa
     private final List<Movie> danhSachPhim;
     private final DefaultTableModel model;
     private final JTable table;
-    private int demId; // để tự sinh id cho phim mới
+    private int demId; 
 
     public MovieFrame(List<Movie> danhSachPhim) {
         super("Quản Lý Phim");
@@ -29,7 +31,7 @@ public class MovieFrame extends JFrame {
         model = new DefaultTableModel(COT, 0) {
             @Override
             public boolean isCellEditable(int row, int col) {
-                return false; // không cho sửa trực tiếp trên bảng
+                return false; 
             }
         };
 
@@ -43,7 +45,6 @@ public class MovieFrame extends JFrame {
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Tô màu cột "Tên phim" theo đúng toTitleColor() của từng phim
         table.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable t, Object value, boolean isSelected,
@@ -68,13 +69,18 @@ public class MovieFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // ---- Panel nút Thêm / Xóa ----
         JButton btnThem = new JButton("Thêm phim");
         JButton btnXoa = new JButton("Xóa phim");
+        JButton btnLuu = new JButton("Lưu file");
+        JButton btnMo = new JButton("Mở file");
         btnThem.addActionListener(e -> moFormThemPhim());
         btnXoa.addActionListener(e -> xoaPhimDangChon());
+        btnLuu.addActionListener(e -> luuVaoFile());
+        btnMo.addActionListener(e -> moTuFile());
 
         JPanel panelNut = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelNut.add(btnMo);
+        panelNut.add(btnLuu);
         panelNut.add(btnThem);
         panelNut.add(btnXoa);
 
@@ -101,6 +107,7 @@ public class MovieFrame extends JFrame {
         };
     }
 
+    // ---------------- CHỨC NĂNG XÓA ----------------
     private void xoaPhimDangChon() {
         int row = table.getSelectedRow();
         if (row < 0) {
@@ -128,10 +135,11 @@ public class MovieFrame extends JFrame {
         JTextField txtNSX = new JTextField();
         JTextField txtTheLoai = new JTextField();
 
-
+        // 2 field riêng cho Phim bộ
         JTextField txtSoTap = new JTextField();
         JTextField txtThoiLuongTap = new JTextField();
 
+        // 2 field riêng cho Phim chiếu rạp
         JTextField txtThoiLuongPhim = new JTextField();
         JTextField txtDoanhThu = new JTextField();
 
@@ -209,6 +217,62 @@ public class MovieFrame extends JFrame {
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this,
                 "Giá / số tập / thời lượng / doanh thu phải là số hợp lệ.",
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // ---------------- LƯU FILE ----------------
+    private void luuVaoFile() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setSelectedFile(new File("movies.txt"));
+        int ketQuaChon = chooser.showSaveDialog(this);
+        if (ketQuaChon != JFileChooser.APPROVE_OPTION) return;
+
+        String[] luaChon = {"Kết nối (ghi đè từ đầu)", "Tiếp nối (thêm vào cuối file cũ)"};
+        int viTri = JOptionPane.showOptionDialog(this,
+                "Chọn chế độ ghi file:", "Chế độ ghi",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, luaChon, luaChon[0]);
+
+        if (viTri < 0) return; // người dùng đóng hộp thoại không chọn gì
+
+        boolean tiepNoi = (viTri == 1);
+
+        try {
+            Moviefilemanager.ghiFile(chooser.getSelectedFile().getAbsolutePath(), danhSachPhim, tiepNoi);
+            JOptionPane.showMessageDialog(this,
+                "Đã " + (tiepNoi ? "nối thêm " : "ghi ") + danhSachPhim.size() + " phim vào file.",
+                "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Lỗi khi ghi file: " + ex.getMessage(),
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void moTuFile() {
+        JFileChooser chooser = new JFileChooser();
+        int ketQua = chooser.showOpenDialog(this);
+        if (ketQua != JFileChooser.APPROVE_OPTION) return;
+
+        try {
+            List<Movie> phimDocDuoc = Moviefilemanager.docFile(chooser.getSelectedFile().getAbsolutePath());
+
+            danhSachPhim.clear();
+            danhSachPhim.addAll(phimDocDuoc);
+            model.setRowCount(0);
+            for (Movie m : danhSachPhim) {
+                model.addRow(taoDong(m));
+            }
+            demId = danhSachPhim.size() + 1;
+
+            JOptionPane.showMessageDialog(this,
+                "Đã đọc " + phimDocDuoc.size() + " phim từ file.",
+                "Thành công", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (IOException | ParseException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Lỗi khi đọc file: " + ex.getMessage(),
                 "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
